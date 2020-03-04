@@ -1,6 +1,5 @@
 import pygame as pg
 from settings import *
-from sprites import *
 from tilemap import *
 
 
@@ -11,7 +10,7 @@ class Game:
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
-        self.debug = True
+        self.debug = False
         self.start_new()
 
     def start_new(self):
@@ -19,24 +18,11 @@ class Game:
         self.walls = pg.sprite.Group()
         self.trapdoors = pg.sprite.Group()
 
-        self.map = Map(resource_path('map.txt'))
-        self.load_map()
+        self.map = Map(self)
+        self.map.load()
         self.camera = Camera(self.map.width, self.map.height)
         self.grid = WeightedGrid(
-            self, (self.map.grid_width, self.map.grid_height))
-
-    def load_map(self):
-        for row, tiles in enumerate(self.map.data):
-            for col, tile in enumerate(tiles):
-                if tile == '#':
-                    Wall(self, (col, row), 'mid')
-                if tile == '0':
-                    Wall(self, (col, row), 'mid')
-                if tile == '=':
-                    Trapdoor(self, (col, row), False)
-                    self.player = Player(self, (col, row))
-                if tile == '!':
-                    Trapdoor(self, (col, row), True)
+            self, (self.map.gridwidth, self.map.gridheight))
 
     def draw_grid(self,):
         for x in range(0, WIDTH, TILESIZE):

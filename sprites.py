@@ -74,8 +74,11 @@ class Player(pg.sprite.Sprite):
         if not self.is_moving and not self.path:
             self.pos = self.coords_to_move
 
+
+"""
     def draw(self):
         self.game.screen.blit(self.image, self.rect.topleft)
+"""
 
 
 class Wall(pg.sprite.Sprite):
@@ -84,6 +87,18 @@ class Wall(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = WALL_SPRITE[sprite].convert_alpha()
+        self.rect = self.image.get_rect()
+        self.gridpos = vec(gridpos)
+        self.pos = get_screenpos(self.gridpos)
+        self.rect.topleft = self.pos
+
+
+class Floor(pg.sprite.Sprite):
+    def __init__(self, game, gridpos):
+        self.groups = game.all_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = FLOOR.convert_alpha()
         self.rect = self.image.get_rect()
         self.gridpos = vec(gridpos)
         self.pos = get_screenpos(self.gridpos)

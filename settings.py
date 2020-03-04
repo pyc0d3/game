@@ -1,21 +1,28 @@
-import os, sys
+import os
+import sys
+
+
 def resource_path(relative_path):
-	""" Get absolute path to resource, works for dev and for PyInstaller """
-	try:
-		# PyInstaller creates a temp folder and stores path in _MEIPASS
-		base_path = sys._MEIPASS
-	except Exception:
-		base_path = os.path.abspath(".")
-	return os.path.join(base_path, relative_path)
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 
 def vec2int(v):
     return (int(v.x), int(v.y))
 
+
 def get_gridpos(pos):
-	return pos // TILESIZE
+    return pos // TILESIZE
+
 
 def get_screenpos(gridpos):
-	return gridpos*TILESIZE
+    return gridpos * TILESIZE
+
 
 from pygame.math import Vector2
 vec = Vector2
@@ -37,7 +44,7 @@ YELLOW = (255, 255, 0)
 
 WIDTH = 1024
 HEIGHT = 768
-FPS = 60
+FPS = 120
 FRAME_CONSTANT = 11
 TITLE = "THE GAME"
 BGCOLOR = DARKGRAY
@@ -47,5 +54,3 @@ GRIDWIDTH = WIDTH // TILESIZE
 GRIDHEIGHT = HEIGHT // TILESIZE
 
 PLAYER_SPEED = 0.5
-
-

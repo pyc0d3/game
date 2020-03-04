@@ -1,6 +1,7 @@
 import pygame as pg
 import dungeon_generator
 from settings import *
+from sprites import *
 from collections import deque
 import heapq
 
@@ -88,19 +89,118 @@ class PriorityQueue:
 
 
 class Map:
-    def __init__(self, file_name):
+    def __init__(self, game):
+        self.game = game
         gen = dungeon_generator.Generator()
         gen.gen_level()
-        gen.gen_tiles_level()
-        self.data = []
-        with open(file_name, 'rt') as f:
-            for line in f:
-                self.data.append(line.strip())
+        self.level = gen.level
+        self.reachable_objects = ['floor', 'start_door', 'end_door', 'player']
+        self.unreachable_objects = ['wall', 'stone']
+        self.gridwidth = gen.width
+        self.gridheight = gen.height
+        self.width = self.gridwidth * TILESIZE
+        self.height = self.gridheight * TILESIZE
 
-        self.grid_width = len(self.data[0])
-        self.grid_height = len(self.data)
-        self.width = self.grid_width * TILESIZE
-        self.height = self.grid_height * TILESIZE
+    def load(self):
+        for row in range(self.gridheight):
+            for col in range(self.gridwidth):
+                Floor(self.game, (col, row))
+
+        for row in range(self.gridheight):
+            for col in range(self.gridwidth):
+
+                if self.level[row][col] == 'stone':
+                    Wall(self.game, (col, row), 'mid')
+
+                if self.level[row][col] == 'start_door':
+                    Trapdoor(self.game, (col, row), False)
+                    self.game.player = Player(self.game, (col, row))
+
+                if self.level[row][col] == 'exit_door':
+                    Trapdoor(self.game, (col, row), True)
+
+        # set up all walls and rotate them
+        for row in range(1, self.gridheight - 1):
+            for col in range(1, self.gridwidth - 1):
+                if self.level[row][col] == 'wall':
+
+                    """if top == 'smth' and bottom == 'smth' and\
+                            left == 'smth' and right == 'smth':
+                    """
+                    if self.level[row - 1][col] in self.unreachable_objects and self.level[row + 1][col] in self.unreachable_objects and\
+                            self.level[row][col - 1] in self.unreachable_objects and self.level[row][col + 1] in self.unreachable_objects:
+
+                        Wall(self.game, (col, row), 'mid')
+
+                    elif self.level[row - 1][col] in self.reachable_objects and self.level[row + 1][col] in self.unreachable_objects and\
+                            self.level[row][col - 1] in self.unreachable_objects and self.level[row][col + 1] in self.unreachable_objects:
+                        Wall(self.game, (col, row), 'up')
+
+                    elif self.level[row - 1][col] in self.unreachable_objects and self.level[row + 1][col] in self.reachable_objects and\
+                            self.level[row][col - 1] in self.unreachable_objects and self.level[row][col + 1] in self.unreachable_objects:
+                        Wall(self.game, (col, row), 'down')
+
+                    elif self.level[row - 1][col] in self.unreachable_objects and self.level[row + 1][col] in self.unreachable_objects and\
+                            self.level[row][col - 1] in self.reachable_objects and self.level[row][col + 1] in self.unreachable_objects:
+
+                        Wall(self.game, (col, row), 'left')
+
+                    elif self.level[row - 1][col] in self.unreachable_objects and self.level[row + 1][col] in self.unreachable_objects and\
+                            self.level[row][col - 1] in self.unreachable_objects and self.level[row][col + 1] in self.reachable_objects:
+
+                        Wall(self.game, (col, row), 'right')
+                    elif self.level[row - 1][col] in self.reachable_objects and self.level[row + 1][col] in self.unreachable_objects and\
+                            self.level[row][col - 1] in self.reachable_objects and self.level[row][col + 1] in self.unreachable_objects:
+
+                        Wall(self.game, (col, row), 'up-left')
+                    elif self.level[row - 1][col] in self.reachable_objects and self.level[row + 1][col] in self.unreachable_objects and\
+                            self.level[row][col - 1] in self.unreachable_objects and self.level[row][col + 1] in self.reachable_objects:
+
+                        Wall(self.game, (col, row), 'up-right')
+
+                    elif self.level[row - 1][col] in self.unreachable_objects and self.level[row + 1][col] in self.reachable_objects and\
+                            self.level[row][col - 1] in self.reachable_objects and self.level[row][col + 1] in self.unreachable_objects:
+
+                        Wall(self.game, (col, row), 'down-left')
+                    elif self.level[row - 1][col] in self.unreachable_objects and self.level[row + 1][col] in self.reachable_objects and\
+                            self.level[row][col - 1] in self.unreachable_objects and self.level[row][col + 1] in self.reachable_objects:
+
+                        Wall(self.game, (col, row), 'down-right')
+
+                    elif self.level[row - 1][col] in self.reachable_objects and self.level[row + 1][col] in self.unreachable_objects and\
+                            self.level[row][col - 1] in self.reachable_objects and self.level[row][col + 1] in self.reachable_objects:
+
+                        Wall(self.game, (col, row), 'solo_up')
+
+                    elif self.level[row - 1][col] in self.unreachable_objects and self.level[row + 1][col] in self.reachable_objects and\
+                            self.level[row][col - 1] in self.reachable_objects and self.level[row][col + 1] in self.reachable_objects:
+
+                        Wall(self.game, (col, row), 'solo_down')
+
+                    elif self.level[row - 1][col] in self.reachable_objects and self.level[row + 1][col] in self.reachable_objects and\
+                            self.level[row][col - 1] in self.reachable_objects and self.level[row][col + 1] in self.unreachable_objects:
+
+                        Wall(self.game, (col, row), 'solo_left')
+
+                    elif self.level[row - 1][col] in self.reachable_objects and self.level[row + 1][col] in self.reachable_objects and\
+                            self.level[row][col - 1] in self.unreachable_objects and self.level[row][col + 1] in self.reachable_objects:
+
+                        Wall(self.game, (col, row), 'solo_right')
+
+                    elif self.level[row - 1][col] in self.unreachable_objects and self.level[row + 1][col] in self.unreachable_objects and\
+                            self.level[row][col - 1] in self.reachable_objects and self.level[row][col + 1] in self.reachable_objects:
+
+                        Wall(self.game, (col, row), 'solo_mid_ver')
+
+                    elif self.level[row - 1][col] in self.reachable_objects and self.level[row + 1][col] in self.reachable_objects and\
+                            self.level[row][col - 1] in self.unreachable_objects and self.level[row][col + 1] in self.unreachable_objects:
+
+                        Wall(self.game, (col, row), 'solo_mid_hor')
+
+                    elif self.level[row - 1][col] in self.reachable_objects and self.level[row + 1][col] in self.reachable_objects and\
+                            self.level[row][col - 1] in self.reachable_objects and self.level[row][col + 1] in self.reachable_objects:
+
+                        Wall(self.game, (col, row), 'solo')
 
 
 class Camera:
